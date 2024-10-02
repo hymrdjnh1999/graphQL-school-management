@@ -21,6 +21,7 @@ export class LessonService {
       startDate,
       endDate,
       id: uuid(),
+      students: [],
     });
     return await this.lessonRepository.save(lesson);
   }
@@ -33,5 +34,19 @@ export class LessonService {
 
   async getAllLesson(): Promise<Lesson[]> {
     return await this.lessonRepository.find();
+  }
+
+  async assignStudentsToLesson(
+    lessonId: string,
+    studentIds: string[],
+  ): Promise<Lesson> {
+    let lesson = await this.lessonRepository.findOneBy({
+      id: lessonId,
+    });
+    lesson.students = [...(lesson.students ?? []), ...studentIds];
+    lesson.students = lesson.students.filter(
+      (s, idx, sts) => sts.findIndex((st) => st === s) !== idx,
+    );
+    return await this.lessonRepository.save(lesson);
   }
 }
